@@ -1,0 +1,27 @@
+{
+  "name": "hierarchical-timer",
+  "version": "1.0.0",
+  "description": "Track run times hierachically.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marneborn/hierarchical-timer.git"
+  },
+  "keywords": [
+    "nodejs",
+    "timer",
+    "runtime"
+  ],
+  "author": "Mikael Arneborn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marneborn/hierarchical-timer/issues"
+  },
+  "homepage": "https://github.com/marneborn/hierarchical-timer#readme"
+}
