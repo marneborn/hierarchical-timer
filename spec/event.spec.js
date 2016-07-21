@@ -13,33 +13,40 @@ describe("Event", function () {
     beforeEach(function () {
         jasmine.addMatchers(customMatchers);
         start = new Date();
-        event = new Event("some message");
+        event = new Event();
     });
 
     describe("Basic functionality:", function () {
-        describe("constructor", function () {
+
+        describe("construction", function () {
 
             it("should be able to create", function () {
-                expect(new Event()).toBeInstanceOf(Event);
+                let ev = new Event();
+                expect(ev).toBeInstanceOf(Event);
             });
+
         });
 
         describe(".startTime", function () {
 
-            it("should set the startTime on creation", function () {
-                expect(event.startTime.getTime()).toBeCloseTo((new Date()).getTime(), -1);
+            it("should not set the startTime until the first start.", function () {
+                expect(event.startTime).toBeUndefined();
             });
 
+            it("should set the startTime on a start.", function () {
+                event.start();
+                expect(new Date() - event.startTime).toBeLessThan(2);
+            });
         });
 
         describe(".endTime", function () {
 
-            it("should have no set endTime on creation", function () {
+            it("should have no set endTime on creation.", function () {
                 expect(event.endTime).toBeUndefined();
             });
 
-            it("should set the endTime on a stop", function (done) {
-
+            it("should set the endTime on a stop.", function (done) {
+                event.start();
                 BPromise.resolve()
                     .delay(50)
                     .then(function () {
@@ -54,7 +61,12 @@ describe("Event", function () {
 
         describe(".message", function () {
 
-            it("should be able to retrieve the message set on creation", function () {
+            it("shouldn't have a message set before it's started", function () {
+                expect(event.message).toBeUndefined();
+            });
+
+            it("should be able to retrieve the message set on creation.", function () {
+                event.start("some message");
                 expect(event.message).toBe("some message");
             });
 
@@ -62,11 +74,17 @@ describe("Event", function () {
 
         describe(".isRunning", function () {
 
-            it("should say that a newly created event is running.", function () {
+            it("should say that a newly created event is not running.", function () {
+                expect(event.isRunning).toBe(false);
+            });
+
+            it("should say that a started event is running.", function () {
+                event.start();
                 expect(event.isRunning).toBe(true);
             });
 
-            it("should not be running after a stop", function () {
+            it("should say that a stopped event is not running.", function () {
+                event.start();
                 event.stop();
                 expect(event.isRunning).toBe(false);
             });
@@ -75,15 +93,22 @@ describe("Event", function () {
 
         describe(".delta", function () {
 
-            it("should say that the delta is undefined while still running.", function () {
+            it("should say that unstarted event has an undefined delta.", function () {
                 expect(event.delta).toBeUndefined();
             });
 
-            it("should be able to calculate a delta after a stop", function (done) {
+            it("should say that a started event has an undefined delta.", function () {
+                event.start();
+                expect(event.delta).toBeUndefined();
+            });
+
+            it("should be able to calculate a delta after a stop.", function (done) {
+                let t1 = new Date();
+                event.start();
                 BPromise.delay(50)
                     .then(function () {
                         event.stop();
-                        expect(event.delta).toBeCloseTo(new Date() - start, -1);
+                        expect(event.delta - (new Date() - t1)).toBeLessThan(5);
                     })
                     .then(done)
                     .catch(done.fail);
@@ -93,13 +118,15 @@ describe("Event", function () {
 
         describe(".stop", function () {
 
-            it("should return the original event", function () {
+            it("should return the original event.", function () {
+                event.start();
                 let ev = event.stop();
                 expect(ev).toBe(event);
                 expect(ev).toBeInstanceOf(Event);
             });
 
-            it("should throw an error if stop is called on a stopped event", function () {
+            it("should throw an error if stop is called on a stopped event.", function () {
+                event.start();
                 event.stop();
                 expect(event.stop).toThrow();
             });
@@ -108,9 +135,10 @@ describe("Event", function () {
 
         describe(".start", function () {
 
-            it("should throw an error if start is called on a stopped event", function () {
+            it("should throw an error if start is called on a stopped event.", function () {
                 event.start();
-                expect(event.stop).toThrow();
+                event.stop();
+                expect(event.start).toThrow();
             });
 
         });
@@ -119,7 +147,7 @@ describe("Event", function () {
 
     describe("Multiple starts and stops", function () {
 
-        it("should be running after 2 starts and 1 stop", function () {
+        it("should be running after 2 starts and 1 stop.", function () {
             event.start();
             event.start();
             event.stop();
@@ -133,7 +161,15 @@ describe("Event", function () {
             expect(ev).not.toBe(event);
         });
 
+        it("should have no child events on start+stop.", function () {
+            event.start();
+            event.start();
+            let ev = event.stop();
+            expect(ev).not.toBe(event);
+        });
+
         it("should stop the outer event on the second .stop.", function (done) {
+            event.start();
             BPromise.delay(50)
                 .then(function () {
                     event.start();
