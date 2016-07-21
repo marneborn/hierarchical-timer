@@ -2,12 +2,12 @@
   "name": "hierarchical-timer",
   "version": "1.0.0",
   "description": "Track run times hierachically.",
-  "main": "index.js",
+  "main": "lib/hierarchical-timer.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "npm test"
+    "test": "node node_modules/jasmine/bin/jasmine.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/marneborn/hierarchical-timer/issues"
   },
-  "homepage": "https://github.com/marneborn/hierarchical-timer#readme"
+  "homepage": "https://github.com/marneborn/hierarchical-timer#readme",
+  "devDependencies": {
+    "bluebird": "^3.4.1",
+    "jasmine": "^2.4.1"
+  }
 }
