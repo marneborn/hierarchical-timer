@@ -4,8 +4,6 @@ const BPromise = require('bluebird'),
       customMatchers = require('./custom-matchers'),
       Event = require('../lib/Event');
 
-let timer;
-
 describe("Event", function () {
 
     let event, start;
@@ -161,13 +159,6 @@ describe("Event", function () {
             expect(ev).not.toBe(event);
         });
 
-        it("should have no child events on start+stop.", function () {
-            event.start();
-            event.start();
-            let ev = event.stop();
-            expect(ev).not.toBe(event);
-        });
-
         it("should stop the outer event on the second .stop.", function (done) {
             event.start();
             BPromise.delay(50)
@@ -189,5 +180,54 @@ describe("Event", function () {
                 .then(done)
                 .catch(done.fail);
         });
+
+        it("should have no child events on start+stop.", function () {
+
+            event.start();
+            event.start();
+            let ev = event.stop();
+            expect(ev).not.toBe(event);
+        });
+
+    });
+
+    describe("Counting child events", function () {
+
+        it("should have no child events on creation.", function () {
+            expect(event.toJSON().children.length).toBe(0);
+        });
+
+        it("should have no child events after a single start.", function () {
+            event.start();
+            expect(event.toJSON().children.length).toBe(0);
+        });
+
+        it("should have one child event after a multiple starts.", function () {
+            event.start();
+            event.start();
+            event.start();
+            event.start();
+            expect(event.toJSON().children.length).toBe(1);
+        });
+
+        it("should have two child events if one is started after the first child is stopped.", function () {
+            event.start();
+            event.start();
+            event.stop();
+            event.start();
+            expect(event.toJSON().children.length).toBe(2);
+        });
+
+        it("should properly stop the top event (case 1).", function () {
+            event.start();
+            event.start();
+            event.stop();
+            event.start();
+            expect(event.stop()).not.toBe(event);
+            expect(event.isRunning).toBe(true);
+            expect(event.stop()).toBe(event);
+            expect(event.isRunning).toBe(false);
+        });
+
     });
 });
