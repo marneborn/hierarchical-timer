@@ -205,6 +205,73 @@ describe("Event", function () {
 
     });
 
+    describe(".forEach", function () {
+        let forEachSpy;
+
+        beforeEach(function () {
+            forEachSpy = jasmine.createSpy('forEach');
+        });
+
+        describe("basic functionality", function () {
+            it("should execute the function on itself", function () {
+                event.forEach(forEachSpy, "acc");
+                expect(forEachSpy).toHaveBeenCalledWith(event, "acc");
+            });
+        });
+
+        describe("Complicated test case", function () {
+
+            let ev1, ev2, ev3, ev4;
+
+            beforeEach(function () {
+                // 1
+                //  2
+                //   3
+                //  4
+                event.start(1);
+                event.start(2);
+                event.start(3);
+                ev3 = event.stop();
+                ev2 = event.stop();
+                event.start(4);
+                ev4 = event.stop();
+                ev1 = event.stop();
+            });
+
+            it("should execute the function on itself and all children", function () {
+
+                event.forEach(forEachSpy);
+
+                expect(forEachSpy.calls.argsFor(0)[0]).toBe(ev1);
+                expect(forEachSpy.calls.argsFor(1)[0]).toBe(ev2);
+                expect(forEachSpy.calls.argsFor(2)[0]).toBe(ev3);
+                expect(forEachSpy.calls.argsFor(3)[0]).toBe(ev4);
+            });
+
+            it("should pass the result of the parents execution on to the children", function () {
+
+                forEachSpy.and.callFake(function (ev, depth) { return depth+1; });
+                event.forEach(forEachSpy, 0);
+
+                expect(forEachSpy.calls.argsFor(0)[1]).toBe(0);
+                expect(forEachSpy.calls.argsFor(1)[1]).toBe(1);
+                expect(forEachSpy.calls.argsFor(2)[1]).toBe(2);
+                expect(forEachSpy.calls.argsFor(3)[1]).toBe(1);
+            });
+
+            it("should pass the initial value down if the function doesn't return anything", function () {
+
+                forEachSpy.and.callFake(function () {});
+                event.forEach(forEachSpy, "acc");
+
+                expect(forEachSpy.calls.argsFor(0)[1]).toBe("acc");
+                expect(forEachSpy.calls.argsFor(1)[1]).toBe("acc");
+                expect(forEachSpy.calls.argsFor(2)[1]).toBe("acc");
+                expect(forEachSpy.calls.argsFor(3)[1]).toBe("acc");
+            });
+        });
+    });
+
     describe("Counting child events", function () {
 
         it("should have no child events on creation.", function () {
