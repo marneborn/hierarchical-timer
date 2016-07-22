@@ -76,20 +76,16 @@ class Event {
         return this;
     }
 
-    forEach(fn, cleanup) {
-        this._forEach(fn, cleanup, void(0), void(0), void(0));
-    }
-
-    // function (event, index, parent, siblings) {}
-    _forEach(fn, cleanup, index, parent, siblings) {
-        let children = this[CHILDREN].reverse();
-        fn(this, index, parent, siblings);
-
-        for (let i=0; i<children.length; i++) {
-            children[i]._forEach(fn, cleanup, i, this, children);
-        };
-
-        cleanup(this, index, parent, siblings);
+    makeStrings(indent, template) {
+        let strings = [];
+        strings.push(applyTemplate(this, indent.sofar, template));
+        Array.prototype.push.apply(
+            strings,
+            this[CHILDREN].reverse().map(function (ev) {
+                return indent.inc + ev.makeStrings(indent, template);
+            })
+        );
+        return strings;
     }
 
     toJSON() {
@@ -107,4 +103,13 @@ module.exports = Event;
 
 function runToJSON (ev) {
     return ev.toJSON();
+}
+
+function applyTemplate (event, indent, template) {
+    return template
+        .replace(/%i/g, indent)
+        .replace(/%m/g, event.message || '')
+        .replace(/%d/g, event.delta || '?')
+        .replace(/%s/g, event.startTime)
+        .replace(/%e/g, event.endTime);
 }

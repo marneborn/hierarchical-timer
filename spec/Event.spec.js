@@ -214,8 +214,8 @@ describe("Event", function () {
 
         describe("basic functionality", function () {
             it("should execute the function on itself", function () {
-                event.forEach(forEachSpy, "acc");
-                expect(forEachSpy).toHaveBeenCalledWith(event, "acc");
+                event.forEach(forEachSpy);
+                expect(forEachSpy).toHaveBeenCalledWith(event, void(0), void(0), void(0));
             });
         });
 
@@ -239,36 +239,29 @@ describe("Event", function () {
             });
 
             it("should execute the function on itself and all children", function () {
-
                 event.forEach(forEachSpy);
-
                 expect(forEachSpy.calls.argsFor(0)[0]).toBe(ev1);
                 expect(forEachSpy.calls.argsFor(1)[0]).toBe(ev2);
                 expect(forEachSpy.calls.argsFor(2)[0]).toBe(ev3);
                 expect(forEachSpy.calls.argsFor(3)[0]).toBe(ev4);
             });
 
-            it("should pass the result of the parents execution on to the children", function () {
-
-                forEachSpy.and.callFake(function (ev, depth) { return depth+1; });
-                event.forEach(forEachSpy, 0);
-
-                expect(forEachSpy.calls.argsFor(0)[1]).toBe(0);
-                expect(forEachSpy.calls.argsFor(1)[1]).toBe(1);
-                expect(forEachSpy.calls.argsFor(2)[1]).toBe(2);
+            it("should pass the index of the child into the function, the top has no index", function () {
+                event.forEach(forEachSpy);
+                expect(forEachSpy.calls.argsFor(0)[1]).toBe(void(0));
+                expect(forEachSpy.calls.argsFor(1)[1]).toBe(0);
+                expect(forEachSpy.calls.argsFor(2)[1]).toBe(0);
                 expect(forEachSpy.calls.argsFor(3)[1]).toBe(1);
             });
 
-            it("should pass the initial value down if the function doesn't return anything", function () {
-
-                forEachSpy.and.callFake(function () {});
-                event.forEach(forEachSpy, "acc");
-
-                expect(forEachSpy.calls.argsFor(0)[1]).toBe("acc");
-                expect(forEachSpy.calls.argsFor(1)[1]).toBe("acc");
-                expect(forEachSpy.calls.argsFor(2)[1]).toBe("acc");
-                expect(forEachSpy.calls.argsFor(3)[1]).toBe("acc");
+            it("should pass the parent object as the 3rd argument", function () {
+                event.forEach(forEachSpy);
+                expect(forEachSpy.calls.argsFor(0)[2]).toBe(void(0));
+                expect(forEachSpy.calls.argsFor(1)[2]).toBe(ev1);
+                expect(forEachSpy.calls.argsFor(2)[2]).toBe(ev2);
+                expect(forEachSpy.calls.argsFor(3)[2]).toBe(ev1);
             });
+
         });
     });
 
