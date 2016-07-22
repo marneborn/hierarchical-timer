@@ -206,75 +206,7 @@ describe("Event", function () {
     });
 
     describe(".forEach", function () {
-        let forEachSpy;
-
-        beforeEach(function () {
-            forEachSpy = jasmine.createSpy('forEach');
-        });
-
-        describe("basic functionality", function () {
-            it("should execute the function on itself", function () {
-                let index = new Object(),
-                    parent = new Object(),
-                    siblings = [];
-                event.forEach(forEachSpy, index, parent, siblings);
-                expect(forEachSpy).toHaveBeenCalledWith(event, index, parent, siblings);
-            });
-        });
-
-        describe("Complicated test case", function () {
-
-            let ev1, ev2, ev3, ev4,
-                index, parent, siblings;
-
-            beforeEach(function () {
-                // 1
-                //  2
-                //   3
-                //  4
-                event.start(1);
-                event.start(2);
-                event.start(3);
-                ev3 = event.stop();
-                ev2 = event.stop();
-                event.start(4);
-                ev4 = event.stop();
-                ev1 = event.stop();
-
-                index = new Object();
-                parent = new Object();
-                siblings = new Array();
-                event.forEach(forEachSpy, index, parent, siblings);
-            });
-
-            it("should execute the function on itself and all children", function () {
-                expect(forEachSpy.calls.argsFor(0)[0]).toBe(ev1);
-                expect(forEachSpy.calls.argsFor(1)[0]).toBe(ev2);
-                expect(forEachSpy.calls.argsFor(2)[0]).toBe(ev3);
-                expect(forEachSpy.calls.argsFor(3)[0]).toBe(ev4);
-            });
-
-            it("should pass the index of the child into the function, the top has no index", function () {
-                expect(forEachSpy.calls.argsFor(0)[1]).toBe(index);
-                expect(forEachSpy.calls.argsFor(1)[1]).toBe(0);
-                expect(forEachSpy.calls.argsFor(2)[1]).toBe(0);
-                expect(forEachSpy.calls.argsFor(3)[1]).toBe(1);
-            });
-
-            it("should pass the parent object as the 3rd argument", function () {
-                expect(forEachSpy.calls.argsFor(0)[2]).toBe(parent);
-                expect(forEachSpy.calls.argsFor(1)[2]).toBe(ev1);
-                expect(forEachSpy.calls.argsFor(2)[2]).toBe(ev2);
-                expect(forEachSpy.calls.argsFor(3)[2]).toBe(ev1);
-            });
-
-            it("should pass the siblings as the 4th argument", function () {
-                expect(forEachSpy.calls.argsFor(0)[3]).toBe(siblings);
-                expect(forEachSpy.calls.argsFor(1)[3]).toEqual([ev2, ev4]);
-                expect(forEachSpy.calls.argsFor(2)[3]).toEqual([ev3]);
-                expect(forEachSpy.calls.argsFor(3)[3]).toEqual([ev2, ev4]);
-            });
-        });
+        // Better tested in HierarchicalTimer
     });
 
     describe("Counting child events", function () {
