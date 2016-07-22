@@ -129,6 +129,20 @@ describe("Event", function () {
                 expect(event.stop).toThrow();
             });
 
+            it("should throw an error if stop is called with a different message from start.", function () {
+                event.start("foo");
+                expect(function () {
+                    event.stop("foo");
+                }).not.toThrow();
+            });
+
+            it("should throw an error if stop is called with a different message from start.", function () {
+                event.start("foo");
+                expect(function () {
+                    event.stop("bar");
+                }).toThrow();
+            });
+
         });
 
         describe(".start", function () {
