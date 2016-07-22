@@ -78,9 +78,9 @@ describe("HierarchicalTimer", function () {
         describe("Basic case", function () {
 
             beforeEach(function () {
-                timer.start();
+                timer.start(1);
                 timer.stop();
-                timer.start();
+                timer.start(2);
                 timer.stop();
 
                 timer.forEach(forEachSpy);
@@ -112,18 +112,12 @@ describe("HierarchicalTimer", function () {
             let index, parent, siblings;
 
             beforeEach(function () {
-                /*
-                 * 1
-                 *   2
-                 *     3
-                 *   4
-                 */
-                timer.start(1);
-                timer.start(2);
-                timer.start(3);
+                timer.start(0); //[0] 0
+                timer.start(1); //[1]   1
+                timer.start(2); //[2]     2
                 timer.stop();
                 timer.stop();
-                timer.start(4);
+                timer.start(3); //[3]   3
                 timer.stop();
                 timer.stop();
 
@@ -156,6 +150,73 @@ describe("HierarchicalTimer", function () {
                 expect(forEachSpy.calls.argsFor(1)[3]).toEqual([events[1], events[3]]);
                 expect(forEachSpy.calls.argsFor(2)[3]).toEqual([events[2]]);
                 expect(forEachSpy.calls.argsFor(3)[3]).toEqual([events[1], events[3]]);
+            });
+        });
+    });
+
+    describe(".sort", function () {
+
+        let forEachSpy,
+            events;
+
+        beforeEach(function () {
+            forEachSpy = jasmine.createSpy('forEach');
+            events = [];
+            timer.on('start', function (ev) {
+                events.push(ev);
+            });
+        });
+
+        describe("Basic case", function () {
+
+            beforeEach(function () {
+                timer.start(1);
+                timer.stop();
+                timer.start(2);
+                timer.stop();
+
+                timer
+                    .sort(function (a, b) {
+                        return b.message - a.message;
+                    })
+                    .forEach(forEachSpy);
+            });
+
+            it("should call the objects in reverse order", function () {
+                expect(forEachSpy.calls.argsFor(0)[0]).toBe(events[1]);
+                expect(forEachSpy.calls.argsFor(1)[0]).toBe(events[0]);
+            });
+        });
+
+        describe("Sub events should also be sorted", function () {
+            beforeEach(function () {
+                timer.start(0);  //[0] 0
+                timer.start(1);  //[1]   1
+                timer.stop();
+                timer.start(2);  //[2]   2
+                timer.stop();
+                timer.stop();
+                timer.start(5);  //[3] 5
+                timer.start(4);  //[4]   4
+                timer.stop();
+                timer.start(3);  //[5]   3
+                timer.stop();
+                timer.stop();
+
+                timer
+                    .sort(function (a, b) {
+                        return b.message - a.message;
+                    })
+                    .forEach(forEachSpy);
+            });
+
+            it("should sort children in reverse numerical order based on message.", function () {
+                expect(forEachSpy.calls.argsFor(0)[0]).toBe(events[3]);
+                expect(forEachSpy.calls.argsFor(1)[0]).toBe(events[4]);
+                expect(forEachSpy.calls.argsFor(2)[0]).toBe(events[5]);
+                expect(forEachSpy.calls.argsFor(3)[0]).toBe(events[0]);
+                expect(forEachSpy.calls.argsFor(4)[0]).toBe(events[2]);
+                expect(forEachSpy.calls.argsFor(5)[0]).toBe(events[1]);
             });
         });
 
