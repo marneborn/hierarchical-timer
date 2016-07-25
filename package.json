@@ -1,6 +1,6 @@
 {
   "name": "hierarchical-timer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Track run times hierachically.",
   "main": "lib/hierarchical-timer.js",
   "directories": {
