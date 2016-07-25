@@ -7,13 +7,18 @@ const BPromise = require('bluebird'),
 
 describe("HierarchicalTimer", function () {
 
-    let timer;
+    let timer, events;
 
     beforeEach(function () {
         jasmine.addMatchers(customMatchers);
         timer = new HierarchicalTimer();
-    });
 
+        events = [];
+        timer.on('start', function (ev) {
+            events.push(ev);
+        });
+
+    });
 
     describe("construction", function () {
 
@@ -64,15 +69,10 @@ describe("HierarchicalTimer", function () {
 
     describe(".forEach", function () {
 
-        let forEachSpy,
-            events;
+        let forEachSpy;
 
         beforeEach(function () {
             forEachSpy = jasmine.createSpy('forEach');
-            events = [];
-            timer.on('start', function (ev) {
-                events.push(ev);
-            });
         });
 
         describe("Basic case", function () {
@@ -220,6 +220,28 @@ describe("HierarchicalTimer", function () {
             });
         });
 
+    });
+
+    describe(".flatten", function () {
+        beforeEach(function () {
+            timer.start(0);  //[0] 0
+            timer.start(1);  //[1]   1
+            timer.stop();
+            timer.start(2);  //[2]   2
+            timer.stop();
+            timer.stop();
+            timer.start(5);  //[3] 5
+            timer.start(4);  //[4]   4
+            timer.stop();
+            timer.start(3);  //[5]   3
+            timer.stop();
+            timer.stop();
+        });
+
+        it("should flatten to [this, children] for each level of hierarchy", function () {
+            let flat = timer.flatten();
+            expect(flat).toEqual(events);
+        });
     });
 
     describe("Emit errors:", function () {
